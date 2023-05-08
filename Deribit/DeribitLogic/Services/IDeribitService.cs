@@ -32,4 +32,10 @@ public interface IDeribitService
     /// <param name="subscribeMethod"></param>
     /// <returns></returns>
     public Task SubscribeAsync(string subscribeMethod);
+
+    /// <summary>
+    /// Run the listener until the user stop it.
+    /// </summary>
+    /// <returns></returns>
+    public Task RunListener();
 }

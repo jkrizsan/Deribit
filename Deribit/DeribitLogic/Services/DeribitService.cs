@@ -11,7 +11,7 @@ public class DeribitService : IDeribitService
 {
     //TODO: move to config
     private const string _urlPrefix = "wss://";
-    //private const string _urlSuffix = "/den/ws"; // not weorking in this way
+    //private const string _urlSuffix = "/den/ws"; // not werking in this way
     private const string _urlSuffix = "/ws/api/v2";
     private const string _authMethod = "public/auth";
     private const string _clientCredentials = "client_credentials";
@@ -21,6 +21,8 @@ public class DeribitService : IDeribitService
 
     private readonly IClientWebSocketWrapper _clientWebSocketWrapper;
     private ILogger<DeribitService> _logger;
+
+    private volatile bool _isRun = true; // the listener still need to run
 
     private AppSettings _appSettings;
 
@@ -52,7 +54,7 @@ public class DeribitService : IDeribitService
 
         string result = await _clientWebSocketWrapper.ReceiveMessageAsync(CancellationToken.None);
 
-        //todo: less magic number, add own wxception type
+        //todo: less magic number, use own exception type
         if (result.Contains("result") == false
             || result.Contains("error") == true) 
         {
@@ -71,6 +73,7 @@ public class DeribitService : IDeribitService
 
     public async Task DisconnectAsync()
     {
+        _isRun = false;
         await SubscribeAsync(_unsubscribe);
         await _clientWebSocketWrapper.DisonnectAndDisposeAsync(WebSocketCloseStatus.NormalClosure, CancellationToken.None);
     }
@@ -80,6 +83,16 @@ public class DeribitService : IDeribitService
         await ConnectAsync();
         await AuthenticateAsync();
         await SubscribeAsync(_subscribe);
+    }
+
+    //TODO: add logging and exception handling
+    public async Task RunListener()
+    {
+        while (_isRun)
+        {
+            string result = await _clientWebSocketWrapper.ReceiveMessageAsync(CancellationToken.None);
+            _logger.LogInformation($"Received: {result}");
+        }
     }
 
     public async Task SubscribeAsync(string subscribeMethod)
@@ -103,10 +116,9 @@ public class DeribitService : IDeribitService
         //todo: find better solution for the sporadic behaviour
         while (cnt < 3 || isFine == false)
         {
-
             string result = await _clientWebSocketWrapper.ReceiveMessageAsync(CancellationToken.None);
 
-            //todo: less magic number, add own wxception type
+            //todo: less magic number, add own exception type
             if (result.Contains("result") == false
                 || result.Contains("error") == true)
             {
@@ -132,7 +144,7 @@ public class DeribitService : IDeribitService
     {
         var config = _appSettings.DeribitApiClientConfig;
 
-        StringBuilder url = new StringBuilder(_urlPrefix);
+        StringBuilder url = new StringBuilder(_urlPrefix); //todo: try to estimate the capacity param a better way
 
         url.Append(config.BaseUrl);
         url.Append(_urlSuffix);

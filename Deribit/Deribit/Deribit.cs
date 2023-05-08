@@ -8,21 +8,29 @@ using Microsoft.Extensions.Logging;
 
 namespace Deribit;
 
+//TODO: should use more logging and have to solve a couple of problems that mentioned at the todos.
+//Todo: The error handling also should be improved 
 public class Deribit
 {
     private static ILogger<Deribit> _logger;
     private static IHost? _host;
-    private  static IDeribitService _deribitService;
+    private static IDeribitService _deribitService;
+
+    private static IHelper _helper;
 
     public static async Task Main(string[] args)
-    {
-        Console.CancelKeyPress += Console_CancelKeyPress;
-
-
+    {        
         _host = CreateHostBuilder(args).Build();
 
-        await runClientAsync();
+        //todo: have to finalize the async related bug
+        _helper = _host.Services.GetRequiredService<IHelper>();
+        Console.CancelKeyPress += async (sender, e) =>
+        {
+            await _helper.Console_CancelKeyPressAsync(sender, e);
+            e.Cancel = true;
+        };
 
+        await runClientAsync();
     }
 
     private static async Task runClientAsync()
@@ -33,20 +41,12 @@ public class Deribit
         try
         {
             await _deribitService.InitializeAsync();
+            await _deribitService.RunListener();
         }
         catch (Exception ex) 
         {
             _logger.LogError(ex.Message);
         }
-    }
-
-    async static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
-    {
-        _logger.LogInformation("CTRL+C pressed, initiating graceful shutdown...");
-
-        await _deribitService.DisconnectAsync();
-
-        e.Cancel = true;
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -62,5 +62,24 @@ public class Deribit
 
                 services.AddTransient<IClientWebSocketWrapper, ClientWebSocketWrapper>();
                 services.AddTransient<IDeribitService, DeribitService>();
+                services.AddTransient<IHelper, Helper>();
             });
+
+    //TODO: temp solution
+    public interface IHelper
+    {
+        Task Console_CancelKeyPressAsync(object? sender, ConsoleCancelEventArgs e);
+    }
+
+    public class Helper : IHelper
+    {
+        public async Task Console_CancelKeyPressAsync(object? sender, ConsoleCancelEventArgs e)
+        {
+            _logger.LogInformation("CTRL+C pressed, initiating graceful shutdown...");
+
+            await _deribitService.DisconnectAsync();
+
+            e.Cancel = true;
+        }
+    }
 }
