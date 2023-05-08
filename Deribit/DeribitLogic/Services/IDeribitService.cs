@@ -26,5 +26,10 @@ public interface IDeribitService
     /// <returns></returns>
     public Task AuthenticateAsync();
 
-    
+    /// <summary>
+    /// Subscribe for topics based on the config
+    /// </summary>
+    /// <param name="subscribeMethod"></param>
+    /// <returns></returns>
+    public Task SubscribeAsync(string subscribeMethod);
 }
