@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using System.Text;
 
 namespace DeribitLogic.Wrappers;
 
@@ -21,5 +22,21 @@ public class ClientWebSocketWrapper : IClientWebSocketWrapper
     {
         await _clientWebSocket.CloseAsync(webSocketCloseStatus, string.Empty, token);
         _clientWebSocket.Dispose();
+    }
+
+    public async Task<string> ReceiveMessageAsync(CancellationToken token)
+    {
+        var buffer = new byte[1024];
+        var result = _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).Result;
+
+        return  await Task.Run(() => Encoding.UTF8.GetString(buffer, 0, result.Count));
+    }
+
+    public async Task SendMessageAsync(string message, WebSocketMessageType type, CancellationToken token)
+    {
+        byte[]? encoded = Encoding.UTF8.GetBytes(message);
+        ArraySegment<Byte> buffer = new ArraySegment<Byte>(encoded, 0, encoded.Length);
+
+        await _clientWebSocket.SendAsync(buffer, type, true, token);
     }
 }

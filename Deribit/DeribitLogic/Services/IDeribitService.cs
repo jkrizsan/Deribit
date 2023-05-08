@@ -13,4 +13,18 @@ public interface IDeribitService
     /// </summary>
     /// <returns></returns>
     public Task DisconnectAsync();
+
+    /// <summary>
+    /// Here call all the necessary method before the proper running
+    /// </summary>
+    /// <returns></returns>
+    public Task InitializeAsync();
+
+    /// <summary>
+    /// Send message for authentication, check the result
+    /// </summary>
+    /// <returns></returns>
+    public Task AuthenticateAsync();
+
+    
 }

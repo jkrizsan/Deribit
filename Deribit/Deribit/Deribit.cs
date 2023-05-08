@@ -30,14 +30,22 @@ public class Deribit
         _deribitService = _host.Services.GetRequiredService<IDeribitService>();
         _logger = _host.Services.GetRequiredService<ILogger<Deribit>>();
 
-        await _deribitService.ConnectAsync();
-        await _deribitService.DisconnectAsync();
+        try
+        {
+            await _deribitService.InitializeAsync();
+        }
+        catch (Exception ex) 
+        {
+            _logger.LogError(ex.Message);
+        }
     }
 
     async static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
         _logger.LogInformation("CTRL+C pressed, initiating graceful shutdown...");
-        // TODO Stop the API client here
+
+        await _deribitService.DisconnectAsync();
+
         e.Cancel = true;
     }
 

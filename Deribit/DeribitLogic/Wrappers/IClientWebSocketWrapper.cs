@@ -19,4 +19,20 @@ public interface IClientWebSocketWrapper
     /// <param name="token"></param>
     /// <returns></returns>
     Task DisonnectAndDisposeAsync(WebSocketCloseStatus webSocketCloseStatus, CancellationToken token);
+
+    /// <summary>
+    /// Sending Message to the service
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="type"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    Task SendMessageAsync(string message, WebSocketMessageType type, CancellationToken token);
+
+    /// <summary>
+    /// Receive message from the service
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    Task<string> ReceiveMessageAsync(CancellationToken token);
 }
