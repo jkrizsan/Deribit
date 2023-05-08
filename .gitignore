@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Deribit/.vs/Deribit
+/Deribit/Deribit/obj
+/Deribit/.vs/ProjectEvaluation
+/Deribit/Deribit/bin/Debug/net7.0
+/Deribit/DeribitLogic/bin/Debug/net7.0
+/Deribit/DeribitLogic/obj
+/Deribit/DeribitTests/bin/Debug/net7.0
+/Deribit/DeribitTests/obj
