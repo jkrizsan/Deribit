@@ -10,8 +10,9 @@ namespace Deribit;
 
 public class Deribit
 {
-    private readonly static ILogger<Deribit> _logger;
+    private static ILogger<Deribit> _logger;
     private static IHost? _host;
+    private  static IDeribitService _deribitService;
 
     public static async Task Main(string[] args)
     {
@@ -19,6 +20,18 @@ public class Deribit
 
 
         _host = CreateHostBuilder(args).Build();
+
+        await runClientAsync();
+
+    }
+
+    private static async Task runClientAsync()
+    {
+        _deribitService = _host.Services.GetRequiredService<IDeribitService>();
+        _logger = _host.Services.GetRequiredService<ILogger<Deribit>>();
+
+        await _deribitService.ConnectAsync();
+        await _deribitService.DisconnectAsync();
     }
 
     async static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
