@@ -1,4 +1,6 @@
 ﻿using DeribitLogic.Models;
+using DeribitLogic.Services;
+using DeribitLogic.Wrappers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,5 +38,8 @@ public class Deribit
 
                 services.AddSingleton(config.GetSection(nameof(AppSettings))
                     .Get<AppSettings>());
+
+                services.AddTransient<IClientWebSocketWrapper, ClientWebSocketWrapper>();
+                services.AddTransient<IDeribitService, DeribitService>();
             });
 }
