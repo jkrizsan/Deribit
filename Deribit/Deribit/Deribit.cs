@@ -12,17 +12,16 @@ namespace Deribit;
 //Todo: The error handling also should be improved 
 public class Deribit
 {
-    private static ILogger<Deribit> _logger;
+    private static ILogger<Deribit>? _logger;
     private static IHost? _host;
-    private static IDeribitService _deribitService;
+    private static IDeribitService? _deribitService;
 
-    private static IHelper _helper;
+    private static IHelper? _helper;
 
     public static async Task Main(string[] args)
     {        
         _host = CreateHostBuilder(args).Build();
 
-        //todo: have to finalize the async related bug
         _helper = _host.Services.GetRequiredService<IHelper>();
         Console.CancelKeyPress += async (sender, e) =>
         {
@@ -35,17 +34,20 @@ public class Deribit
 
     private static async Task runClientAsync()
     {
-        _deribitService = _host.Services.GetRequiredService<IDeribitService>();
-        _logger = _host.Services.GetRequiredService<ILogger<Deribit>>();
+        _logger = _host?.Services.GetRequiredService<ILogger<Deribit>>();
 
         try
         {
+            _deribitService = _host?.Services.GetRequiredService<IDeribitService>();
+
+            _ = _deribitService ?? throw new ArgumentNullException(nameof(_deribitService));
+
             await _deribitService.InitializeAsync();
             await _deribitService.RunListener();
         }
         catch (Exception ex) 
         {
-            _logger.LogError(ex.Message);
+            _logger?.LogError(ex.Message);
         }
     }
 
@@ -57,15 +59,14 @@ public class Deribit
                .AddJsonFile("appSettings.json", true, true)
                .Build();
 
-                services.AddSingleton(config.GetSection(nameof(AppSettings))
+                services?.AddSingleton(config?.GetSection(nameof(AppSettings))
                     .Get<AppSettings>());
 
-                services.AddTransient<IClientWebSocketWrapper, ClientWebSocketWrapper>();
-                services.AddTransient<IDeribitService, DeribitService>();
-                services.AddTransient<IHelper, Helper>();
+                services?.AddTransient<IClientWebSocketWrapper, ClientWebSocketWrapper>();
+                services?.AddTransient<IDeribitService, DeribitService>();
+                services?.AddTransient<IHelper, Helper>();
             });
 
-    //TODO: temp solution
     public interface IHelper
     {
         Task Console_CancelKeyPressAsync(object? sender, ConsoleCancelEventArgs e);
@@ -73,13 +74,14 @@ public class Deribit
 
     public class Helper : IHelper
     {
-        public async Task Console_CancelKeyPressAsync(object? sender, ConsoleCancelEventArgs e)
+        public Task Console_CancelKeyPressAsync(object? sender, ConsoleCancelEventArgs e)
         {
-            _logger.LogInformation("CTRL+C pressed, initiating graceful shutdown...");
+            _logger?.LogInformation("CTRL+C pressed, initiating graceful shutdown...");
 
-            await _deribitService.DisconnectAsync();
+            _deribitService?.SwitchOffListener();
 
             e.Cancel = true;
+            return Task.CompletedTask;
         }
     }
 }

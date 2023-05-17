@@ -11,5 +11,4 @@ public class Channel
     {
         Channels = new List<string>();
     }
-
 }

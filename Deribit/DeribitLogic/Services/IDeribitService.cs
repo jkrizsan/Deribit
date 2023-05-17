@@ -38,4 +38,11 @@ public interface IDeribitService
     /// </summary>
     /// <returns></returns>
     public Task RunListener();
+
+    /// <summary>
+    /// <summary>
+    /// Switch off the Listener
+    /// </summary>
+    /// <returns></returns>
+    public void SwitchOffListener();
 }

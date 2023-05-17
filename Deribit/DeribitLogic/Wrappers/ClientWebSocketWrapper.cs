@@ -5,6 +5,7 @@ namespace DeribitLogic.Wrappers;
 
 public class ClientWebSocketWrapper : IClientWebSocketWrapper
 {
+    private const int _bufferSize = 1024;
     private readonly ClientWebSocket _clientWebSocket;
 
     public ClientWebSocketWrapper()
@@ -26,8 +27,8 @@ public class ClientWebSocketWrapper : IClientWebSocketWrapper
 
     public async Task<string> ReceiveMessageAsync(CancellationToken token)
     {
-        var buffer = new byte[1024];
-        var result = _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).Result;
+        var buffer = new byte[_bufferSize];
+        var result = await _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
 
         return  await Task.Run(() => Encoding.UTF8.GetString(buffer, 0, result.Count));
     }

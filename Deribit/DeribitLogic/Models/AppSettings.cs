@@ -2,5 +2,5 @@
 
 public class AppSettings
 {
-    public DeribitApiClientConfig DeribitApiClientConfig { get; init; }
+    public DeribitApiClientConfig? DeribitApiClientConfig { get; init; }
 }
